@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Georgian Statistical Assistant</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #6c63ff;
+        --bg: #f4f6f8;
+        --user-msg: #6c63ff;
+        --bot-msg: #e2e8f0;
+        --white: #ffffff;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        color: var(--primary);
+        text-align: center;
+      }
+
+      #chat {
+        flex-grow: 1;
+        background: var(--white);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        padding: 20px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+      }
+
+      .user,
+      .bot {
+        padding: 10px 14px;
+        margin: 10px 0;
+        max-width: 75%;
+        border-radius: 16px;
+        word-wrap: break-word;
+        white-space: pre-line;
+      }
+
+      .user {
+        background: var(--user-msg);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+      }
+
+      .bot {
+        background: var(--bot-msg);
+        color: #333;
+        margin-right: auto;
+      }
+
+      .input-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: auto;
+      }
+
+      #prompt {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+
+      button {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      #send {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      #send:hover {
+        background-color: #5851d3;
+      }
+
+      #download {
+        background-color: #10b981;
+        color: white;
+      }
+
+      #download:hover {
+        background-color: #0e9f6e;
+      }
+
+      @media (max-width: 600px) {
+        .input-container {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        #prompt {
+          width: 100%;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🇬🇪 Georgian Statistical Assistant</h1>
+
+    <div id="chat"></div>
+
+    <div class="input-container">
+      <input type="text" id="prompt" placeholder="Enter your question..." />
+      <button id="send">Send</button>
+      <button id="download">Download Conversation</button>
+    </div>
+
+    <script>
+      const chat = document.getElementById("chat");
+      const promptInput = document.getElementById("prompt");
+      const sendButton = document.getElementById("send");
+      const downloadButton = document.getElementById("download");
+
+      function appendMessage(text, sender) {
+        const message = document.createElement("div");
+        message.className = sender;
+        message.textContent = text;
+        chat.appendChild(message);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function downloadConversation() {
+        const messages = chat.querySelectorAll(".user, .bot");
+        let text = `Georgian Statistical Assistant Conversation\nGenerated: ${new Date().toLocaleString()}\n\n`;
+        messages.forEach((msg) => {
+          const who = msg.classList.contains("user") ? "You" : "Assistant";
+          text += `${who}: ${msg.textContent}\n\n`;
+        });
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `georgian_stats_chat_${new Date()
+          .toISOString()
+          .slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      sendButton.addEventListener("click", async () => {
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        appendMessage(prompt, "user");
+        promptInput.value = "";
+
+        appendMessage("⏳ Thinking...", "bot");
+
+        try {
+          const res = await fetch("/api/query", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: prompt }),
+          });
+
+          const data = await res.json();
+          chat.lastChild.remove(); // remove 'Thinking...'
+
+          if (data.success) {
+            appendMessage(data.reply, "bot");
+          } else {
+            appendMessage("❌ Error: " + data.error, "bot");
+          }
+        } catch (err) {
+          chat.lastChild.remove(); // remove 'Thinking...'
+          appendMessage("⚠️ Failed to connect to the server.", "bot");
+        }
+      });
+
+      promptInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendButton.click();
+      });
+
+      downloadButton.addEventListener("click", downloadConversation);
+    </script>
+  </body>
+</html>
