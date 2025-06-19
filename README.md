@@ -14,6 +14,16 @@ A Python-based statistical assistant that uses MCP (Model Context Protocol) and 
 ---
 
 ## Installation
+Mac users must create a virtual environment
+
+```bash
+python3 -m venv venv  (This creates a folder named venv with a clean Python environment.)
+```
+```bash
+source venv/bin/activate (Activate the virtual environment)
+```
+
+You’ll see (venv) in your terminal prompt — that means it’s active.
 
 Install the required dependencies:
 
