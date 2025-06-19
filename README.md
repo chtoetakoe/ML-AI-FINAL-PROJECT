@@ -1,60 +1,73 @@
 # GeoStatAI
 
-A Python-based statistical assistant that uses GPT-4 and MCP (Model Context Protocol) to analyze and provide insights on Georgian statistical data. The application processes data scraped from [საქსტატი (Geostat)](https://www.geostat.ge/ka), Georgia's National Statistics Office, and uses advanced AI to provide meaningful analysis and insights from the statistical data.
+A Python-based statistical assistant that uses MCP (Model Context Protocol) and the `llama3:8b` model from Ollama to analyze and provide insights on Georgian statistical data. The application processes data scraped from [საქსტატი (Geostat)](https://www.geostat.ge/ka), Georgia's National Statistics Office.
 
-
+---
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- pip (Python package installer)
+* Python 3.8 or higher
+* `pip` (Python package installer)
+* [Ollama](https://ollama.com/) installed and running
+* AI model: `llama3:8b` pulled via Ollama
+
+---
 
 ## Installation
 
 Install the required dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` file contains all necessary Python packages for the project.
-
-
-## Configuration
-
-1. Create a `.env` file in the root directory of the project
-2. Add your OpenAI API key to the `.env` file:
-```
-OPENAI_API_KEY=your_api_key_here
-```
+---
 
 ## Running the Application
 
-To start the application, run:
-```bash
-python app.py
-```
+1. Make sure [Ollama](https://ollama.com/) is installed and running:
+
+   ```bash
+   ollama serve
+   ```
+
+2. Pull the required AI model:
+
+   ```bash
+   ollama run llama3:8b
+   ```
+
+3. Navigate to the `data` folder and run the scraper to generate the required dataset:
+
+   ```bash
+   cd data
+   python scrapper.py
+   cd ..
+   ```
+
+4. Navigate to the `backend` directory and start the server:
+
+   ```bash
+   cd backend
+   python start_server.py
+   ```
 
 The application will:
-1. Load the data from `data/scraped_data_mcp1.json`
-2. Present you with a prompt where you can enter your questions
-3. Use GPT-4 to analyze the data and provide insights
-4. Display the results including:
-   - A title
-   - Raw data statistics
-   - Analysis of the data
 
-To exit the application, type "exit", "quit", or "გასვლა" (in Georgian).
+* Scrape statistical data using `scrapper.py`
+* Load data from `data/scraped_data_mcp1.json`
+* Start a Flask server
+* Use the MCP system and `llama3:8b` model to handle queries
+
+---
 
 ## Project Structure
 
-- `app.py`: Main application file
-- `domain.py`: Domain-specific logic
-- `llm/`: LLM-related functionality
-- `mcp/`: Model Context Protocol implementation for managing data context and analysis flow
-- `data/`: Contains the data files
-- `.env`: Environment variables (API keys)
-- `requirements.txt`: List of Python package dependencies
+* `backend/start_server.py`: Entry point to launch the backend server
+* `data/scrapper.py`: Script to scrape data from Geostat
+* `domain.py`: Domain-specific logic
+* `llm/`: LLM-related functionality
+* `mcp/`: Model Context Protocol implementation
+* `data/`: Contains the scraped data
+* `requirements.txt`: Python package dependencies
 
-## Notes
-
-- Always ensure you have the latest dependencies installed by running `pip install -r requirements.txt` after pulling new changes 
